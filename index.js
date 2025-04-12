@@ -16,20 +16,37 @@ app.get('/products', async(req, res) => {
     const products = await getProducts();
     res.send(products);
 })
-const cache = {};
-async function getProductsWithId (id) {
-    if(id in cache) {
-        // return cache[id];
+const cacheV2 = {};
+async function getProductsWithIdV2 (id) {
+    if(id in cacheV2) {
+        return cacheV2[id].then(r => r.data);
+    }
+    const API_DOMAIN = 'https://fakestoreapi.com/';
+    const response = axios.get(API_DOMAIN + 'products/' + id);
+    cacheV2[id] = response;
+    const data = (await response).data
+    return data;
+  } 
+
+const cacheV1 = {};
+  async function getProductsWithId (id) {
+    if(id in cacheV1) {
+        return cacheV1[id];
     }
     const API_DOMAIN = 'https://fakestoreapi.com/';
     const response = axios.get(API_DOMAIN + 'products/' + id);
     const data = (await response).data
-    cache[id] = data;
+    cacheV1[id]= data;
     return data;
   } 
 
-app.get('/products/:id', async(req, res) => {
+app.get('/v1/products/:id', async(req, res) => {
     const products = await getProductsWithId(req.params.id);
+    res.send(products);
+});
+
+app.get('/v2/products/:id', async(req, res) => {
+    const products = await getProductsWithIdV2(req.params.id);
     res.send(products);
 })
 const PORT = 3000;
