@@ -1,8 +1,13 @@
 const express = require('express');
 const axios = require('axios')
 const app = express();
+
+app.use((req, res, next) => {
+    console.log(`${req.method} ${req.path}`, req.query);
+    next()
+})
+
 app.get('/', (req, res) => {
-    console.log(req);
     res.send({message: 'Hello World'});
   });
 
@@ -12,7 +17,9 @@ app.get('/', (req, res) => {
     return (await response).data;
   } 
 
-app.get('/products', async(req, res) => {
+  app.use('/products', require('./products'));
+
+app.get('/products/about', async(req, res) => {
     const products = await getProducts();
     res.send(products);
 })
